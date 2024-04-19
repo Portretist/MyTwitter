@@ -1,0 +1,483 @@
+{
+  "definitions": {
+    "Success": {
+      "properties": {
+        "result": {
+          "type": "boolean"
+        }
+      },
+      "type": "object"
+    },
+    "Failure": {
+      "properties": {
+        "result": {
+          "type": "boolean"
+        },
+        "error_type": {
+          "type": "string"
+        },
+        "error_message": {
+          "type": "string"
+        }
+      },
+      "example": {
+        "result": false,
+        "error_type": "Some error type",
+        "error_message": "Some error message"
+      },
+      "type": "object"
+    },
+    "GetUserResponse": {
+      "properties": {
+        "result": {
+          "type": "boolean"
+        },
+        "user": {
+          "properties": {
+            "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "followers": {
+            "default": "There's no one here yet",
+            "type": "string"
+          },
+          "followings": {
+            "default": "There's no one here yet",
+            "type": "string"
+          }
+          }
+        }
+      },
+      "type": "object"
+    },
+    "IDRequirement": {
+      "properties": {
+        "id": {
+          "type": "integer"
+        }
+      },
+      "required": ["id"],
+      "type": "object"
+    },
+    "PostTweetRequirement": {
+      "properties": {
+        "tweet_data": {
+          "type": "string"
+        },
+        "tweet_media_ids": {
+          "example": [1, 2, 3],
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        }
+      },
+      "required": ["tweet_data"],
+      "type": "object"
+    },
+    "PostTweetResponse": {
+      "properties": {
+        "result": {
+          "type": "boolean"
+        },
+        "tweet_id": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+    },
+    "GetTweetResponse": {
+      "properties": {
+        "result": {
+          "type": "boolean"
+        },
+        "tweets": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "integer"
+              },
+              "text": {
+                "type": "string"
+              },
+              "attachments": {
+                "example": [".../static/images/user_id_some_image.jpg", ".../static/images/user_id_another_image.jpg"],
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "likes": {
+                "type": "string",
+                "example": "1,2,3,"
+              },
+              "author": {
+                "properties": {
+                  "id": {
+                    "type": "integer"
+                  },
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "PostMediaResponse": {
+      "properties": {
+        "result": {
+          "type": "boolean"
+        },
+        "media_id": {
+          "type": "integer"
+        }
+      },
+      "type": "object"
+  }
+  },
+  "info": {
+    "title": "Our Twitter",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/api/users/me": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api_key",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user received information about himself.",
+            "schema": {
+              "$ref": "#/definitions/GetUserResponse"
+            }
+          },
+          "500": {
+            "description": "Something went wrong, check the response.",
+            "schema": {
+              "$ref": "#/definitions/Failure"
+            }
+          }
+        },
+        "summary": "This is the endpoint for getting information about a user by their api_key.",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/users/{id}": {
+      "get": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "integer",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user received information about another user.",
+            "schema": {
+              "$ref": "#/definitions/GetUserResponse"
+            }
+          },
+          "500": {
+            "description": "Something went wrong, check the response.",
+            "schema": {
+              "$ref": "#/definitions/Failure"
+            }
+          }
+        },
+        "summary": "This is the endpoint for getting information about any user by their ID.",
+        "tags": [
+          "user"
+        ]
+      }
+    },
+    "/api/tweets": {
+      "get": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api_key",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The user receives tweets from his followings. Not to be confused with followers.",
+            "schema": {
+              "$ref": "#/definitions/GetTweetResponse"
+            }
+          },
+          "500": {
+            "description": "Something went wrong, check the response.",
+            "schema": {
+              "$ref": "#/definitions/Failure"
+            }
+          }
+        },
+        "summary": "This is the endpoint for receiving tweets based on the number of likes from users represented in the followings.",
+        "tags": [
+          "tweet"
+        ]
+      },
+      "post": {
+        "parameters": [
+          {
+            "in": "body",
+            "name": "JSON",
+            "schema": {
+              "$ref": "#/definitions/PostTweetRequirement"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tweet added successfully.",
+            "schema": {
+              "$ref": "#/definitions/PostTweetResponse"
+            }
+          },
+          "500": {
+            "description": "Something went wrong, check the response.",
+            "schema": {
+              "$ref": "#/definitions/Failure"
+            }
+          }
+        },
+        "summary": "This is the end point for adding a tweet.",
+        "tags": [
+          "tweet"
+        ]
+      }
+    },
+    "/api/tweets/{id}": {
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "api_key",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The tweet was successfully deleted.",
+            "schema": {
+              "$ref": "#/definitions/Success"
+            }
+          },
+          "500": {
+            "description": "Something went wrong, check the response.",
+            "schema": {
+              "$ref": "#/definitions/Failure"
+            }
+          }
+        },
+        "summary": "This is the endpoint for deleting tweets by their ID.",
+        "tags": [
+          "tweet"
+        ]
+      }
+    },
+    "/api/media": {
+      "post": {
+        "parameters": [
+          {
+            "in": "query",
+            "name": "api_key",
+            "type": "string",
+            "required": true
+          },
+          {
+            "in": "formData",
+            "name": "image",
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Media added successfully.",
+            "schema": {
+              "$ref": "#/definitions/PostMediaResponse"
+            }
+          },
+          "500": {
+            "description": "Something went wrong, check the response.",
+            "schema": {
+              "$ref": "#/definitions/Failure"
+            }
+          }
+        },
+        "summary": "Add new image",
+        "tags": [
+          "media"
+        ]
+      }
+    },
+    "/api/tweets/{id}/likes": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "api_key",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Like created successfully.",
+            "schema": {
+              "$ref": "#/definitions/Success"
+            }
+          },
+          "500": {
+            "description": "Something went wrong, check the response.",
+            "schema": {
+              "$ref": "#/definitions/Failure"
+            }
+          }
+        },
+        "summary": "Create new like for tweet by tweet_id",
+        "tags": [
+          "likes"
+        ]
+      },
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "api_key",
+            "type": "string",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Like deleted successfully.",
+            "schema": {
+              "$ref": "#/definitions/Success"
+            }
+          },
+          "500": {
+            "description": "Something went wrong, check the response.",
+            "schema": {
+              "$ref": "#/definitions/Failure"
+            }
+          }
+        },
+        "summary": "Delete like from tweet by tweet_id",
+        "tags": [
+          "likes"
+        ]
+      }
+    },
+    "/api/users/{id}/follow": {
+      "post": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "api_key",
+            "type": "string",
+            "required": true
+          }
+      ],
+        "responses": {
+          "200": {
+            "description": "Subscription created successfully.",
+            "schema": {
+              "$ref": "#/definitions/Success"
+            }
+          },
+          "500": {
+            "description": "Something went wrong, check the response.",
+            "schema": {
+              "$ref": "#/definitions/Failure"
+            }
+          }
+        },
+        "summary": "Create subscription by following_id.",
+        "tags": [
+          "subscription"
+        ]
+
+      },
+      "delete": {
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "type": "integer",
+            "required": true
+          },
+          {
+            "in": "query",
+            "name": "api_key",
+            "type": "string",
+            "required": true
+          }
+      ],
+        "responses": {
+          "200": {
+            "description": "Subscription deleted successfully.",
+            "schema": {
+              "$ref": "#/definitions/Success"
+            }
+          },
+          "500": {
+            "description": "Something went wrong, check the response.",
+            "schema": {
+              "$ref": "#/definitions/Failure"
+            }
+          }
+        },
+        "summary": "Delete subscription by following_id.",
+        "tags": [
+          "subscription"
+        ]
+      }
+    }
+  },
+  "swagger": "2.0"
+}
