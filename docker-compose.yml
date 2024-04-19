@@ -1,0 +1,29 @@
+version: '3'
+services:
+  flask:
+    build: .
+    container_name: tweeter
+    environment:
+      - PYTHONUNBUFFERED=True
+    restart: on-failure
+    volumes:
+      - .:/app
+    ports:
+      - "5000:5000"
+    command: python main.py
+    networks:
+      - default
+
+  db:
+    image: postgres
+    hostname: postgres
+    environment:
+      - POSTGRES_USER=tweetereshka
+      - POSTGRES_PASSWORD=tweetereshka
+    restart: always
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db/:/var/lib/postgresql/data
+    networks:
+      - default
